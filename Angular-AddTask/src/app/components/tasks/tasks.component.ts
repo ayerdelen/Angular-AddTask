@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { TASKS } from '../../mock-tasks';
 import { Task } from '../../Task';
+import { TaskService } from '../../services/task.service';
+
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -9,9 +10,23 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./tasks.component.css'],
 })
 export class TasksComponent implements OnInit {
-  tasks: Task[] = TASKS;
+  tasks: Task[] = [];
   faTimes = faTimes;
-  constructor() {}
+  constructor(private tasksService: TaskService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.tasksService.getTasks().subscribe((tasks) => (this.tasks = tasks));
+  }
+  deleteTask(task: Task) {
+    this.tasksService
+      .deleteTask(task)
+      .subscribe(
+        () => (this.tasks = this.tasks.filter((t) => t.id !== task.id))
+      );
+  }
+
+  toggleReminder(task: Task) {
+    task.reminder = !task.reminder;
+    this.tasksService.updateTaskReminder(task).subscribe();
+  }
 }
